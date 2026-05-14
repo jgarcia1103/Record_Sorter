@@ -11,6 +11,22 @@ def create_file_if_not_exists():
     else:
         print("Records file already exists.")
 
+# This function sorts the text in the records.txt file!
+def sort_records_file():
+    with open("records.txt", "r") as f:
+        lines = f.readlines()
+
+    records = []
+    for line in lines:
+        parts = line.strip().split("|")
+        records.append((parts[0], parts[1], parts[2]))
+
+    records.sort(key=lambda r: (r[0].lower(), int(r[2]), r[1].lower()))
+
+    with open("records.txt", "w") as f:
+        for artist, album, year in records:
+            f.write(f"{artist}|{album}|{year}\n")
+
 # This function lets you add new records as you expand your collection by prompting you for the artist, album, and year of release. It saves your records for easy access.
 def add_record():   
     while True:
@@ -25,6 +41,8 @@ def add_record():
 
         with open("records.txt", 'a') as f:
             f.write(f"{artist}|{album}|{year}\n")
+        
+        sort_records_file()
 
         print(f'"{album}" by {artist} ({year}) added!')
 
@@ -105,6 +123,8 @@ def delete_record():
     with open("records.txt", "w") as f:
         for artist, album, year in records:
             f.write(f"{artist}|{album}|{year}\n")
+
+    sort_records_file()
 
     print(f"Deleted: {removed[1]} by {removed[0]} ({removed[2]})")
 
