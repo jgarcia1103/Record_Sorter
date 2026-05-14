@@ -18,17 +18,50 @@ def sort_records_file():
 
     records = []
     for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
         parts = line.strip().split("|")
-        records.append((parts[0], parts[1], parts[2]))
+        artist, album, year_field = parts 
+
+        flag = "*" if year_field.endswith("*") else ""
+        year = year_field.rstrip("*")
+
+        records.append((artist, album, year, flag))
 
     records.sort(key=lambda r: (r[0].lower(), int(r[2]), r[1].lower()))
 
     with open("records.txt", "w") as f:
-        for artist, album, year in records:
-            f.write(f"{artist}|{album}|{year}\n")
+        for artist, album, year, flag in records:
+            f.write(f"{artist}|{album}|{year}{flag}\n")
+
+#This function will clear the * flags from records in records.txt
+def clear_flags():
+    with open("records.txt", "r") as f :
+        lines = f.readlines()
+
+    cleaned = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        parts = line.split("|")
+        if len(parts) == 3 and parts[2].endswith("*"):
+            parts[2] = parts[2].rstrip("*")
+
+        cleaned.append(line.replace("*", "").strip())
+
+    with open("records.txt", "w") as f:
+        for line in cleaned:
+            f.write(line + "\n")
 
 # This function lets you add new records as you expand your collection by prompting you for the artist, album, and year of release. It saves your records for easy access.
-def add_record():   
+def add_record():
+
+    clear_flags()
+
     while True:
         artist = input("Enter artist name (or type 'sort' to sort your records): ")
         
@@ -40,7 +73,8 @@ def add_record():
         year = input("Enter year released: ")
 
         with open("records.txt", 'a') as f:
-            f.write(f"{artist}|{album}|{year}\n")
+            #adds * flag to new records added to your collection
+            f.write(f"{artist}|{album}|{year}*\n")
         
         sort_records_file()
 
@@ -57,14 +91,23 @@ def view_records():
     
     records = []
     for line in lines:
+        lline = line.strip()
+        if not line:
+            continue 
+
         parts = line.strip().split("|")
-        records.append((parts[0], parts[1], parts[2]))
+        artist, album, year_field = parts
+
+        flag = "*" if year_field.endswith("*") else ""
+        year = year_field.rstrip("*")
+
+        records.append((artist, album, year, flag))
 
     records.sort(key=lambda r: (r[0].lower(), int(r[2]), r[1].lower()))
 
     print("\n--- Your Vinyl Collection ---")
-    for artist, album, year in records:
-        print(f"{artist} | {album} | {year}")
+    for artist, album, year, flag in records:
+        print(f"{artist} | {album} | {year} {flag}")
     print("-----------------------------")
 
 # This function allows you to search your catalog of records by artists name for when your collection gets to big to easily browse :)
@@ -101,13 +144,22 @@ def delete_record():
         return
     records = []
     for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
         parts = line.strip().split("|")
-        records.append((parts[0], parts[1], parts[2]))
+        artist, album, year_field = parts
+
+        flag = "*" if year_field.endswith("*") else ""
+        year = year_field.rstrip("*")
+
+        records.append((artist, album, year, flag))
     records.sort(key=lambda r: (r[0].lower(), int(r[2]), r[1].lower()))
 
     print("\n--- Select a Record to Delete ---")
-    for i, (artist, album, year) in enumerate(records):
-        print(f"{i + 1}. {artist} | {album} | {year}")
+    for i, (artist, album, year, flag) in enumerate(records):
+        print(f"{i + 1}. {artist} | {album} | {year} {flag}")
     
     choice = input("\nEnter the number of the record to delete (or 'cancel' to go back): ")
 
@@ -121,8 +173,8 @@ def delete_record():
     removed = records.pop(int(choice) - 1)
 
     with open("records.txt", "w") as f:
-        for artist, album, year in records:
-            f.write(f"{artist}|{album}|{year}\n")
+        for artist, album, year, flag in records:
+            f.write(f"{artist}|{album}|{year}{flag}\n")
 
     sort_records_file()
 
